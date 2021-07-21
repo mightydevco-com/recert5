@@ -1,0 +1,10 @@
+apiVersion: mightydevco.com/v1alpha1
+kind: SSLProxy
+metadata:
+  name: {{ .Values.Name }}
+spec:
+  {{ if .Values.LoadBalancerIP }} 
+  loadBalancerIP: {{ .Values.LoadBalancerIP }} 
+  {{ end }}
+  reverseProxy: http://{{ .Values.Name }}:80
+  replicas: 1

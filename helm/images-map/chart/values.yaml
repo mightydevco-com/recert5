@@ -1,0 +1,2 @@
+recertNginx: gcr.io/williams-heavy-industries/recert-nginx:latest
+recertCertbot: docker.io/uberscott/recert5-certbot:latest

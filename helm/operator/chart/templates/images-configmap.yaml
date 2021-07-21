@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recert-images-configmap
+data:
+  recertNginx: {{ .Values.recertNginx }}
+  recertCertbot: {{ .Values.recertCertbot }}
+

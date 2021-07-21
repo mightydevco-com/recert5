@@ -1,0 +1,8 @@
+apiVersion: mightydevco.com/v1alpha1
+kind: Cert
+metadata:
+  name: {{ .Values.Name }} 
+spec:
+  domain: {{ .Values.Domain }}
+  email: {{ .Values.Email }} 
+  sslProxy: {{ .Values.Name }} 

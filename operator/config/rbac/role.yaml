@@ -1,0 +1,140 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - delete
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recerts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recerts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recerts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recertsslreverseproxies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recertsslreverseproxies/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - migthydevco.mightydevco.com
+  resources:
+  - recertsslreverseproxies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

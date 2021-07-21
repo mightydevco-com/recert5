@@ -1,4 +1,4 @@
-package util
+package controllers
 
 import recert "github.com/mightydevco-com/recert5.git/api/v1"
 
