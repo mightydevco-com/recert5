@@ -1,0 +1,7 @@
+apiVersion: mightydevco.mightydevco.com/v1
+kind: Recert
+metadata:
+  name: recert-sample
+spec:
+  # Add fields here
+  foo: bar

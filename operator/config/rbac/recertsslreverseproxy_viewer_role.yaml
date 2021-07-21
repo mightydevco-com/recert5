@@ -1,0 +1,20 @@
+# permissions for end users to view recertsslreverseproxies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: recertsslreverseproxy-viewer-role
+rules:
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recertsslreverseproxies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - mightydevco.mightydevco.com
+  resources:
+  - recertsslreverseproxies/status
+  verbs:
+  - get

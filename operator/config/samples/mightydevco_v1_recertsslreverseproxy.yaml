@@ -1,0 +1,7 @@
+apiVersion: mightydevco.mightydevco.com/v1
+kind: RecertSSLReverseProxy
+metadata:
+  name: recertsslreverseproxy-sample
+spec:
+  # Add fields here
+  foo: bar
