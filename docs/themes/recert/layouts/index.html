@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+
+
+<head>
+<meta charset="utf-8">
+<title>{{ .Site.Title }}</title>
+
+{{ $css := resources.Get "css/style.css" }}
+<link rel="stylesheet" href="{{"css/style.css" | relURL }}">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;1,200&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<img src="{{"big-logo.png" | relURL }}" class="big_logo center"/>
+<span class="tagline">"A Kubernetes Operator that Automatically Renews SSL Certificates."</span>
+</body>
+</html>

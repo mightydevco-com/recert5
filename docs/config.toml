@@ -1,0 +1,4 @@
+baseURL = "http://uberscott.com/"
+languageCode = "en-us"
+title = "Recert5"
+theme = "recert"

@@ -1,0 +1,40 @@
+
+body {background-color: #330000;}
+
+
+.center{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+
+img.big_logo {
+  max-width: 15%;
+  height: auto;
+}
+
+.tagline{
+  display: block;
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  text-align: center;
+
+  color: #e4a152;
+  font-family: 'Raleway', sans-serif;
+  font-size: x-large;
+  max-width: 50%;
+}
+
+
+/*
+ light f5c16d
+ normal e4a152
+ dark 805726
+*/
+
+
+
+
