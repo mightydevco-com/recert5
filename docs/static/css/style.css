@@ -18,7 +18,7 @@ img.big_logo {
 .tagline{
   display: block;
   margin: auto;
-  width: 50%;
+  width: 800px;
   padding: 10px;
   text-align: center;
 
@@ -26,7 +26,6 @@ img.big_logo {
   font-family: 'Raleway', sans-serif;
   font-style: italic;
   font-size: x-large;
-  max-width: 50%;
 }
 
 
