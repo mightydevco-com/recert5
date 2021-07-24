@@ -1,4 +1,4 @@
-apiVersion: mightydevco.mightydevco.com/v1
+apiVersion: recert5.uberscott.com/v1
 kind: RecertSSLReverseProxy
 metadata:
   name: recertsslreverseproxy-sample

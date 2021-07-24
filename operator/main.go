@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	mightydevcov1 "github.com/mightydevco-com/recert5.git/api/v1"
-	"github.com/mightydevco-com/recert5.git/controllers"
+	recert5v1 "github.com/uberscott/recert5.git/api/v1"
+	"github.com/uberscott/recert5.git/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -44,7 +44,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(mightydevcov1.AddToScheme(scheme))
+	utilruntime.Must(recert5v1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -71,25 +71,25 @@ func main() {
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "6da7a6be.mightydevco.com",
+		LeaderElectionID:       "44533082.uberscott.com",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	if err = (&controllers.RecertReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Recert")
-		os.Exit(1)
-	}
 	if err = (&controllers.RecertSSLReverseProxyReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RecertSSLReverseProxy")
+		os.Exit(1)
+	}
+	if err = (&controllers.RecertReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Recert")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

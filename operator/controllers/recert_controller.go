@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-logr/logr"
-	mightydevcov1 "github.com/mightydevco-com/recert5.git/api/v1"
+	recert5v1 "github.com/uberscott/recert5.git/api/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -43,9 +43,9 @@ type RecertReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=mightydevco.mightydevco.com,resources=recerts,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=mightydevco.mightydevco.com,resources=recerts/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=mightydevco.mightydevco.com,resources=recerts/finalizers,verbs=update
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -61,7 +61,7 @@ func (r *RecertReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	reqLogger.Info("Reconciling Cert")
 
-	instance := &mightydevcov1.Recert{}
+	instance := &recert5v1.Recert{}
 
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 
@@ -78,13 +78,13 @@ func (r *RecertReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	if instance.Status.State == "" {
 		return r.reconcileNone(instance, ctx, reqLogger)
-	} else if instance.Status.State == mightydevcov1.Pending {
+	} else if instance.Status.State == recert5v1.Pending {
 		return r.reconcilePending(instance, ctx, reqLogger)
-	} else if instance.Status.State == mightydevcov1.Creating {
+	} else if instance.Status.State == recert5v1.Creating {
 		return r.reconcileCreating(instance, ctx, reqLogger)
-	} else if instance.Status.State == mightydevcov1.FailureBackoff {
+	} else if instance.Status.State == recert5v1.FailureBackoff {
 		return r.reconcileFailureBackoff(instance, ctx, reqLogger)
-	} else if instance.Status.State == mightydevcov1.Updated {
+	} else if instance.Status.State == recert5v1.Updated {
 		return r.reconcileFailureBackoff(instance, ctx, reqLogger)
 	}
 
@@ -94,18 +94,18 @@ func (r *RecertReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 // SetupWithManager sets up the controller with the Manager.
 func (r *RecertReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mightydevcov1.Recert{}).
+		For(&recert5v1.Recert{}).
 		Complete(r)
 }
 
-func (r *RecertReconciler) reconcileNone(instance *mightydevcov1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
-	if err := r.changeCertState(instance, ctx, mightydevcov1.Pending, reqLogger); err != nil {
+func (r *RecertReconciler) reconcileNone(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
+	if err := r.changeCertState(instance, ctx, recert5v1.Pending, reqLogger); err != nil {
 		return reconcile.Result{}, err
 	}
 	return reconcile.Result{Requeue: true}, nil
 }
 
-func (r *RecertReconciler) reconcilePending(instance *mightydevcov1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
+func (r *RecertReconciler) reconcilePending(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
 	job := r.createRecertAgentPod(instance)
 
@@ -133,7 +133,7 @@ func (r *RecertReconciler) reconcilePending(instance *mightydevcov1.Recert, ctx 
 			return reconcile.Result{}, err
 		}
 
-		if err := r.changeCertState(instance, ctx, mightydevcov1.Creating, reqLogger); err != nil {
+		if err := r.changeCertState(instance, ctx, recert5v1.Creating, reqLogger); err != nil {
 			return reconcile.Result{}, err
 		}
 
@@ -146,19 +146,19 @@ func (r *RecertReconciler) reconcilePending(instance *mightydevcov1.Recert, ctx 
 	}
 }
 
-func (r *RecertReconciler) reconcileCreating(instance *mightydevcov1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
+func (r *RecertReconciler) reconcileCreating(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
 	job, err := r.findJob(instance, ctx)
 
 	// if we can't find the job, then something went really wrong FailureBackoff
 	if err != nil {
-		r.changeCertState(instance, ctx, mightydevcov1.FailureBackoff, reqLogger)
+		r.changeCertState(instance, ctx, recert5v1.FailureBackoff, reqLogger)
 		reqLogger.Error(err, "Job could not be found.")
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
 	}
 
 	if job.Status.Failed > 0 {
-		r.changeCertState(instance, ctx, mightydevcov1.FailureBackoff, reqLogger)
+		r.changeCertState(instance, ctx, recert5v1.FailureBackoff, reqLogger)
 		reqLogger.Info("Job failed.")
 		r.Client.Delete(ctx, job)
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
@@ -189,7 +189,7 @@ func (r *RecertReconciler) reconcileCreating(instance *mightydevcov1.Recert, ctx
 
 	if err != nil {
 		reqLogger.Error(err, "could not find the new newSecret")
-		r.changeCertState(instance, ctx, mightydevcov1.FailureBackoff, reqLogger)
+		r.changeCertState(instance, ctx, recert5v1.FailureBackoff, reqLogger)
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
 	}
 
@@ -206,11 +206,11 @@ func (r *RecertReconciler) reconcileCreating(instance *mightydevcov1.Recert, ctx
 
 	if err != nil {
 		reqLogger.Error(err, "cannot update secret")
-		r.changeCertState(instance, ctx, mightydevcov1.FailureBackoff, reqLogger)
+		r.changeCertState(instance, ctx, recert5v1.FailureBackoff, reqLogger)
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
 	}
 
-	err = r.changeCertState(instance, ctx, mightydevcov1.Updated, reqLogger)
+	err = r.changeCertState(instance, ctx, recert5v1.Updated, reqLogger)
 
 	deployment, err := r.findSslProxyDeployment(instance, ctx)
 
@@ -231,7 +231,7 @@ func (r *RecertReconciler) reconcileCreating(instance *mightydevcov1.Recert, ctx
 	return reconcile.Result{Requeue: true, RequeueAfter: 24 * 60 * 60}, nil
 }
 
-func (r *RecertReconciler) reconcileFailureBackoff(instance *mightydevcov1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
+func (r *RecertReconciler) reconcileFailureBackoff(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
 	reqLogger.Info("processing FailureBackoff")
 	backoffSeconds := GetCertFailureBackoffSeconds(r.Client)
@@ -244,11 +244,11 @@ func (r *RecertReconciler) reconcileFailureBackoff(instance *mightydevcov1.Recer
 		return reconcile.Result{Requeue: true, RequeueAfter: 24 * 60 * 60}, nil
 	}
 
-	err := r.changeCertState(instance, ctx, mightydevcov1.Pending, reqLogger)
+	err := r.changeCertState(instance, ctx, recert5v1.Pending, reqLogger)
 	return reconcile.Result{Requeue: true}, err
 }
 
-func (r *RecertReconciler) reconcileUpdated(instance *mightydevcov1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
+func (r *RecertReconciler) reconcileUpdated(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
 	reqLogger.Info("processing Updated")
 	renewIntervalSeconds := GetRenewInterval(r.Client)
@@ -261,7 +261,7 @@ func (r *RecertReconciler) reconcileUpdated(instance *mightydevcov1.Recert, ctx 
 		return reconcile.Result{Requeue: true, RequeueAfter: renewIntervalSeconds}, nil
 	}
 
-	err := r.changeCertState(instance, ctx, mightydevcov1.Pending, reqLogger)
+	err := r.changeCertState(instance, ctx, recert5v1.Pending, reqLogger)
 	return reconcile.Result{Requeue: true, RequeueAfter: GetUpdateRequeueDelay(r.Client)}, err
 }
 
@@ -269,19 +269,19 @@ func (r *RecertReconciler) reconcileUpdated(instance *mightydevcov1.Recert, ctx 
 // NAMES
 /////////////////////////////////////
 
-func agentName(instance *mightydevcov1.Recert) string {
+func agentName(instance *recert5v1.Recert) string {
 	return AgentName(instance)
 }
 
-func secretName(instance *mightydevcov1.Recert) string {
+func secretName(instance *recert5v1.Recert) string {
 	return SecretNameFromCert(instance)
 }
 
-func newSecretName(instance *mightydevcov1.Recert) string {
+func newSecretName(instance *recert5v1.Recert) string {
 	return NewSecretNameFromCert(instance)
 }
 
-func sslDeploymentName(instance *mightydevcov1.Recert) string {
+func sslDeploymentName(instance *recert5v1.Recert) string {
 	return SslProxyDeploymentNameFromCert(instance)
 }
 
@@ -289,13 +289,13 @@ func sslDeploymentName(instance *mightydevcov1.Recert) string {
 // SUB RESOURCE CREATION
 /////////////////////////////////////
 
-func (r *RecertReconciler) createAgentPodLabels(cr *mightydevcov1.Recert) map[string]string {
+func (r *RecertReconciler) createAgentPodLabels(cr *recert5v1.Recert) map[string]string {
 	return map[string]string{
 		"certbot": cr.Spec.SslReverseProxy,
 	}
 }
 
-func (r *RecertReconciler) createRecertAgentPod(cr *mightydevcov1.Recert) *v1.Job {
+func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert) *v1.Job {
 
 	imagesMap, _ := GetImagesConfigMap(r.Client)
 	serviceAccountName, _ := GetServiceAccount()
@@ -325,7 +325,7 @@ func (r *RecertReconciler) createRecertAgentPod(cr *mightydevcov1.Recert) *v1.Jo
 						{
 							Name:  "certbot",
 							Image: imagesMap.Data["recertCertbot"],
-							Command: []string{"/opt/mightydevcov1/launcher.sh",
+							Command: []string{"/opt/recert5v1/launcher.sh",
 								GetCertCreateMode(r.Client),
 								cr.Spec.Domain,
 								cr.Spec.Email,
@@ -366,7 +366,7 @@ func (r *RecertReconciler) createRecertAgentPod(cr *mightydevcov1.Recert) *v1.Jo
 //  UTILITY
 /////////////////////////////////////
 
-func (r *RecertReconciler) changeCertState(instance *mightydevcov1.Recert, ctx context.Context, state string, reqLogger logr.Logger) error {
+func (r *RecertReconciler) changeCertState(instance *recert5v1.Recert, ctx context.Context, state string, reqLogger logr.Logger) error {
 	prevState := instance.Status.State
 
 	// first lets get the latest instance
@@ -374,7 +374,7 @@ func (r *RecertReconciler) changeCertState(instance *mightydevcov1.Recert, ctx c
 
 	instance.Status.State = state
 
-	if state == mightydevcov1.Updated {
+	if state == recert5v1.Updated {
 		instance.Status.LastUpdated = time.Now().String()
 	}
 
@@ -395,7 +395,7 @@ func (r *RecertReconciler) changeCertState(instance *mightydevcov1.Recert, ctx c
 	return nil
 }
 
-func (r *RecertReconciler) exists(obj client.Object, ctx context.Context, instance *mightydevcov1.Recert) (bool, error) {
+func (r *RecertReconciler) exists(obj client.Object, ctx context.Context, instance *recert5v1.Recert) (bool, error) {
 	err := r.Client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, obj)
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
@@ -407,7 +407,7 @@ func (r *RecertReconciler) exists(obj client.Object, ctx context.Context, instan
 
 }
 
-func (r *RecertReconciler) existsByName(obj client.Object, ctx context.Context, name string, instance *mightydevcov1.Recert) (bool, error) {
+func (r *RecertReconciler) existsByName(obj client.Object, ctx context.Context, name string, instance *recert5v1.Recert) (bool, error) {
 	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: instance.Namespace}, obj)
 	if err != nil && errors.IsNotFound(err) {
 		return false, nil
@@ -419,27 +419,27 @@ func (r *RecertReconciler) existsByName(obj client.Object, ctx context.Context, 
 
 }
 
-func (r *RecertReconciler) findJob(instance *mightydevcov1.Recert, ctx context.Context) (*v1.Job, error) {
+func (r *RecertReconciler) findJob(instance *recert5v1.Recert, ctx context.Context) (*v1.Job, error) {
 	var found v1.Job
 	err := r.Client.Get(ctx, types.NamespacedName{Name: agentName(instance), Namespace: instance.Namespace}, &found)
 	return &found, err
 }
 
-func (r *RecertReconciler) findNewSecret(instance *mightydevcov1.Recert, ctx context.Context) (*corev1.Secret, error) {
+func (r *RecertReconciler) findNewSecret(instance *recert5v1.Recert, ctx context.Context) (*corev1.Secret, error) {
 	return r.findSecretByName(instance, ctx, newSecretName(instance))
 }
 
-func (r *RecertReconciler) findSecret(instance *mightydevcov1.Recert, ctx context.Context) (*corev1.Secret, error) {
+func (r *RecertReconciler) findSecret(instance *recert5v1.Recert, ctx context.Context) (*corev1.Secret, error) {
 	return r.findSecretByName(instance, ctx, secretName(instance))
 }
 
-func (r *RecertReconciler) findSecretByName(instance *mightydevcov1.Recert, ctx context.Context, name string) (*corev1.Secret, error) {
+func (r *RecertReconciler) findSecretByName(instance *recert5v1.Recert, ctx context.Context, name string) (*corev1.Secret, error) {
 	var found corev1.Secret
 	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: instance.Namespace}, &found)
 	return &found, err
 }
 
-func (r *RecertReconciler) findSslProxyDeployment(instance *mightydevcov1.Recert, ctx context.Context) (*appsv1.Deployment, error) {
+func (r *RecertReconciler) findSslProxyDeployment(instance *recert5v1.Recert, ctx context.Context) (*appsv1.Deployment, error) {
 	var found appsv1.Deployment
 	err := r.Client.Get(ctx, types.NamespacedName{Name: sslDeploymentName(instance), Namespace: instance.Namespace}, &found)
 	return &found, err

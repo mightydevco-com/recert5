@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	mightydevcov1 "github.com/mightydevco-com/recert5.git/api/v1"
+	recert5v1 "github.com/uberscott/recert5.git/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -62,10 +62,10 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
-	err = mightydevcov1.AddToScheme(scheme.Scheme)
+	err = recert5v1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = mightydevcov1.AddToScheme(scheme.Scheme)
+	err = recert5v1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme

@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: recerts.mightydevco.mightydevco.com
+  name: recerts.recert5.uberscott.com
 spec:
-  group: mightydevco.mightydevco.com
+  group: recert5.uberscott.com
   names:
     kind: Recert
     listKind: RecertList
@@ -34,7 +34,6 @@ spec:
           metadata:
             type: object
           spec:
-            description: RecertSpec defines the desired state of Recert
             properties:
               domain:
                 type: string

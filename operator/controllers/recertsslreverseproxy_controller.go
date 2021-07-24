@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-logr/logr"
-	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,14 +32,16 @@ import (
 	"strings"
 	"text/template"
 
-	mightydevcov1 "github.com/mightydevco-com/recert5.git/api/v1"
-	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	recert5v1 "github.com/uberscott/recert5.git/api/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	v1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // RecertSSLReverseProxyReconciler reconciles a RecertSSLReverseProxy object
@@ -49,9 +50,9 @@ type RecertSSLReverseProxyReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=migthydevco.mightydevco.com,resources=recertsslreverseproxies,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=mightydevco.mightydevco.com,resources=recertsslreverseproxies/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=mightydevco.mightydevco.com,resources=recertsslreverseproxies/finalizers,verbs=update
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recertsslreverseproxies,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recertsslreverseproxies/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recertsslreverseproxies/finalizers,verbs=update
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;delete
@@ -63,6 +64,7 @@ type RecertSSLReverseProxyReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
 // the RecertSSLReverseProxy object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
@@ -76,7 +78,7 @@ func (r *RecertSSLReverseProxyReconciler) Reconcile(ctx context.Context, req ctr
 	reqLogger.Info("Reconciling SSLProxy")
 
 	// Fetch the SSLProxy instance
-	instance := &mightydevcov1.RecertSSLReverseProxy{}
+	instance := &recert5v1.RecertSSLReverseProxy{}
 	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -122,7 +124,7 @@ func (r *RecertSSLReverseProxyReconciler) Reconcile(ctx context.Context, req ctr
 // SetupWithManager sets up the controller with the Manager.
 func (r *RecertSSLReverseProxyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mightydevcov1.RecertSSLReverseProxy{}).
+		For(&recert5v1.RecertSSLReverseProxy{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).
@@ -132,7 +134,7 @@ func (r *RecertSSLReverseProxyReconciler) SetupWithManager(mgr ctrl.Manager) err
 		Complete(r)
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcilePVC(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcilePVC(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	pvc := r.newSecretPvc(instance)
 
@@ -156,7 +158,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcilePVC(instance *mightydevcov1.R
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcileService(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcileService(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	service := r.newService(instance, logger)
 
@@ -182,7 +184,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileService(instance *mightydevco
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcileCertbotService(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcileCertbotService(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	service := r.newCertbotService(instance)
 
@@ -208,7 +210,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileCertbotService(instance *migh
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) getSSLSecret(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context) (*corev1.Secret, error) {
+func (r *RecertSSLReverseProxyReconciler) getSSLSecret(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context) (*corev1.Secret, error) {
 	found := &corev1.Secret{}
 	secret := r.newSSLSecret(instance)
 	err := r.Get(ctx, types.NamespacedName{Name: secret.Name, Namespace: secret.Namespace}, found)
@@ -220,7 +222,7 @@ func (r *RecertSSLReverseProxyReconciler) getSSLSecret(instance *mightydevcov1.R
 	return found, err
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcileSSLSecret(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcileSSLSecret(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	secret := r.newSSLSecret(instance)
 
@@ -246,7 +248,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileSSLSecret(instance *mightydev
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcileNginxConfigMap(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcileNginxConfigMap(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	tmpl, err := template.New("default.conf").Parse(defaultNginxConf)
 
@@ -287,7 +289,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxConfigMap(instance *migh
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *mightydevcov1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
 
 	secret, err := r.getSSLSecret(instance, ctx)
 
@@ -379,7 +381,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *mig
 	return reconcile.Result{}, nil
 }
 
-func (r *RecertSSLReverseProxyReconciler) newNginxConfigMap(cr *mightydevcov1.RecertSSLReverseProxy, defaultConf string) *corev1.ConfigMap {
+func (r *RecertSSLReverseProxyReconciler) newNginxConfigMap(cr *recert5v1.RecertSSLReverseProxy, defaultConf string) *corev1.ConfigMap {
 	labels := map[string]string{
 		"sslproxy": cr.Name,
 	}
@@ -393,7 +395,7 @@ func (r *RecertSSLReverseProxyReconciler) newNginxConfigMap(cr *mightydevcov1.Re
 	}
 }
 
-func (r *RecertSSLReverseProxyReconciler) newSSLSecret(cr *mightydevcov1.RecertSSLReverseProxy) *corev1.Secret {
+func (r *RecertSSLReverseProxyReconciler) newSSLSecret(cr *recert5v1.RecertSSLReverseProxy) *corev1.Secret {
 	labels := map[string]string{
 		"sslproxy": cr.Name,
 	}
@@ -406,7 +408,7 @@ func (r *RecertSSLReverseProxyReconciler) newSSLSecret(cr *mightydevcov1.RecertS
 	}
 }
 
-func (r *RecertSSLReverseProxyReconciler) newCertbotService(cr *mightydevcov1.RecertSSLReverseProxy) *corev1.Service {
+func (r *RecertSSLReverseProxyReconciler) newCertbotService(cr *recert5v1.RecertSSLReverseProxy) *corev1.Service {
 	labels := map[string]string{
 		"certbot": cr.Name,
 	}
@@ -433,7 +435,7 @@ func (r *RecertSSLReverseProxyReconciler) newCertbotService(cr *mightydevcov1.Re
 	return rtn
 }
 
-func (r *RecertSSLReverseProxyReconciler) newService(cr *mightydevcov1.RecertSSLReverseProxy, log logr.Logger) *corev1.Service {
+func (r *RecertSSLReverseProxyReconciler) newService(cr *recert5v1.RecertSSLReverseProxy, log logr.Logger) *corev1.Service {
 	labels := map[string]string{
 		"sslproxy": cr.Name,
 	}
@@ -471,7 +473,7 @@ func (r *RecertSSLReverseProxyReconciler) newService(cr *mightydevcov1.RecertSSL
 	return rtn
 }
 
-func (r *RecertSSLReverseProxyReconciler) newSecretPvc(cr *mightydevcov1.RecertSSLReverseProxy) *corev1.PersistentVolumeClaim {
+func (r *RecertSSLReverseProxyReconciler) newSecretPvc(cr *recert5v1.RecertSSLReverseProxy) *corev1.PersistentVolumeClaim {
 	labels := map[string]string{
 		"sslproxy": cr.Name,
 	}

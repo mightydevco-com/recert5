@@ -1,28 +1,28 @@
-domain: mightydevco.com
+domain: uberscott.com
 layout:
 - go.kubebuilder.io/v3
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: recert5b
-repo: github.com/mightydevco-com/recert5.git
+projectName: operator
+repo: github.com/uberscott/recert5.git
 resources:
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: mightydevco.com
-  group: mightydevco
-  kind: Recert
-  path: github.com/mightydevco-com/recert5.git/api/v1
+  domain: uberscott.com
+  group: recert5
+  kind: RecertSSLReverseProxy
+  path: github.com/uberscott/recert5.git/api/v1
   version: v1
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: mightydevco.com
-  group: mightydevco
-  kind: RecertSSLReverseProxy
-  path: github.com/mightydevco-com/recert5.git/api/v1
+  domain: uberscott.com
+  group: recert5
+  kind: Recert
+  path: github.com/uberscott/recert5.git/api/v1
   version: v1
 version: "3"

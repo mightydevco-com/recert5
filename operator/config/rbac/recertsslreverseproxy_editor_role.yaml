@@ -5,7 +5,7 @@ metadata:
   name: recertsslreverseproxy-editor-role
 rules:
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recertsslreverseproxies
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recertsslreverseproxies/status
   verbs:

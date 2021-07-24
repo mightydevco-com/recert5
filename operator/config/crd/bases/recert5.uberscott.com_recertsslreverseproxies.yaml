@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: recertsslreverseproxies.mightydevco.mightydevco.com
+  name: recertsslreverseproxies.recert5.uberscott.com
 spec:
-  group: mightydevco.mightydevco.com
+  group: recert5.uberscott.com
   names:
     kind: RecertSSLReverseProxy
     listKind: RecertSSLReverseProxyList

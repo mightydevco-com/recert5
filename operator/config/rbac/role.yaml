@@ -87,7 +87,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recerts
   verbs:
@@ -99,13 +99,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recerts/finalizers
   verbs:
   - update
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recerts/status
   verbs:
@@ -113,21 +113,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - mightydevco.mightydevco.com
-  resources:
-  - recertsslreverseproxies/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - mightydevco.mightydevco.com
-  resources:
-  - recertsslreverseproxies/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - migthydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recertsslreverseproxies
   verbs:
@@ -138,3 +124,17 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - recert5.uberscott.com
+  resources:
+  - recertsslreverseproxies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - recert5.uberscott.com
+  resources:
+  - recertsslreverseproxies/status
+  verbs:
+  - get
+  - patch
+  - update

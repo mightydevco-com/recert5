@@ -4,4 +4,4 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-  name: recertsslreverseproxies.mightydevco.mightydevco.com
+  name: recertsslreverseproxies.recert5.uberscott.com

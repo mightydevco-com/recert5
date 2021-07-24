@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: 6da7a6be.mightydevco.com
+  resourceName: 44533082.uberscott.com

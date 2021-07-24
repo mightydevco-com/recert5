@@ -5,7 +5,7 @@ metadata:
   name: recert-editor-role
 rules:
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recerts
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - mightydevco.mightydevco.com
+  - recert5.uberscott.com
   resources:
   - recerts/status
   verbs:

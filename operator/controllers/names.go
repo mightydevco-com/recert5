@@ -1,6 +1,6 @@
 package controllers
 
-import recert "github.com/mightydevco-com/recert5.git/api/v1"
+import recert "github.com/uberscott/recert5.git/api/v1"
 
 // AgentName the name of the Agent
 func AgentName(instance *recert.Recert) string {
