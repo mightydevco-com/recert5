@@ -4,7 +4,7 @@ layout:
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: recert5
+projectName: recert5b
 repo: github.com/mightydevco-com/recert5.git
 resources:
 - api:
