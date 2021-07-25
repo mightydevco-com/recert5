@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-var VERSION = "5.0.0"
-var RELEASE = ""
+var VERSION = "5.0.1"
+var RELEASE = "snapshot"
 
 // GetImagesConfigMap return the images config map which is a map of docker images
 // that the operator uses to do its various jobs

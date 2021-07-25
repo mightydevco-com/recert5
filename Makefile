@@ -1,5 +1,5 @@
 
-VERSION = 5.0.0
+VERSION = 5.0.1
 documentation:
 	cd docs && hugo -D -b recert5
 	rm -rf ../websites/uberscott.com/html/recert5
