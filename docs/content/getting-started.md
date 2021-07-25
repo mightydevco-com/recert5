@@ -54,8 +54,6 @@ In the newly unzipped helm directory:
 helm install example nginx
 ```
 
-Check if it is running...
-
 ## INSTALL RECERT SSL REVERSE PROXY
 
 ```bash
@@ -74,7 +72,7 @@ spec:
   replicas: 1
 ```
 
-As you can see it is creating a RecertSSLReverseProxy CR which passes traffic to http://nginx-example:80.
+As you can see it is creating a RecertSSLReverseProxy CR which passes traffic to http://example-nginx:80.
 
 
 ## FIND THE REVERSE PROXY EXTERNAL IP ADDRESS
