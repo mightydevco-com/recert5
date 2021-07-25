@@ -26,7 +26,7 @@ import (
 // RecertSSLReverseProxySpec defines the desired state of RecertSSLReverseProxy
 type RecertSSLReverseProxySpec struct {
 	LoadBalancerIP string `json:"loadBalancerIP,omitempty"`
-	ReverseProxy   string `json:"reverseProxy,omitempty"`
+	Pass           string `json:"pass,omitempty"`
 	Replicas       *int32 `json:"replicas,omitempty"`
 }
 

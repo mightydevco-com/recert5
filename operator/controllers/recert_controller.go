@@ -345,7 +345,7 @@ func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert, reqLogger 
 								GetCertCreateMode(r.Client),
 								cr.Spec.Domain,
 								cr.Spec.Email,
-								cr.Name + "-nginx-ssl-reverse-proxy"},
+								cr.Spec.SslReverseProxy + "-nginx-ssl-reverse-proxy"},
 
 							VolumeMounts: []corev1.VolumeMount{
 								{

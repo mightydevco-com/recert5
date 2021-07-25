@@ -1,5 +1,5 @@
 Name: example
-SSLProxy: example-nginx
-Domain: example4.uberscott.com
+SSLProxy: example
+Domain: 
 Email: scott@mightydevco.com
 

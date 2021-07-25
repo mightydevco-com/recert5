@@ -39,11 +39,11 @@ spec:
             properties:
               loadBalancerIP:
                 type: string
+              pass:
+                type: string
               replicas:
                 format: int32
                 type: integer
-              reverseProxy:
-                type: string
             type: object
           status:
             description: RecertSSLReverseProxyStatus defines the observed state of

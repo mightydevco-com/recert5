@@ -15,10 +15,10 @@ func SecretNameFromCert(instance *recert.Recert) string {
 // NewSecretNameFromCert this is the temporary name of the ssl secret before it gets
 // copied back into Secret
 func NewSecretNameFromCert(instance *recert.Recert) string {
-	return instance.Spec.SslReverseProxy + "-ssl-reverse-proxy-new"
+	return instance.Spec.SslReverseProxy + "-nginx-ssl-reverse-proxy-new"
 }
 
-// SslProxyDeploymentNameFromCert is the name of the SSL Nginx Proxy Deployment
+// SslProxyDeploymentNameFromCert is the name of the SSL Nginx Pass Deployment
 func SslProxyDeploymentNameFromCert(instance *recert.Recert) string {
 	return instance.Spec.SslReverseProxy + "-nginx-ssl-reverse-proxy"
 }

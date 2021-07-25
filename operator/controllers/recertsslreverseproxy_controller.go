@@ -258,7 +258,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxConfigMap(instance *rece
 	}
 
 	var content bytes.Buffer
-	data := nginxConf{ReverseProxy: instance.Spec.ReverseProxy,
+	data := nginxConf{Pass: instance.Spec.Pass,
 		CertbotService: instance.Name + "-certbot-service"}
 	err = tmpl.Execute(&content, data)
 
@@ -501,7 +501,7 @@ func (r *RecertSSLReverseProxyReconciler) newSecretPvc(cr *recert5v1.RecertSSLRe
 
 type nginxConf struct {
 	CertbotService string
-	ReverseProxy   string
+	Pass           string
 }
 
 var defaultNginxConf = `##############################################
@@ -532,7 +532,7 @@ server
    
    location /
    {
-      proxy_pass {{ .ReverseProxy }}/;
+      proxy_pass {{ .Pass }}/;
       proxy_set_header X-Forwarded-Host $http_host;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Real-IP $remote_addr;
@@ -554,7 +554,7 @@ server
 
    location /
    {
-      proxy_pass {{ .ReverseProxy }}/;
+      proxy_pass {{ .Pass }}/;
       proxy_set_header X-Forwarded-Host $http_host;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Real-IP $remote_addr;

@@ -6,5 +6,5 @@ spec:
   {{ if .Values.LoadBalancerIP }} 
   loadBalancerIP: {{ .Values.LoadBalancerIP }} 
   {{ end }}
-  reverseProxy: http://{{ .Values.Name }}:80
+  pass: "http://{{ .Values.Pass }}:80"
   replicas: 1
