@@ -1,3 +1,3 @@
-FROM nginx:1.19
+FROM nginx:latest
 
-ADD docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+ADD default.conf /etc/nginx/conf.d/default.conf

@@ -1,5 +1,5 @@
-apiVersion: mightydevco.com/v1alpha1
-kind: SSLProxy
+apiVersion: recert5.uberscott.com/v1
+kind: RecertSSLReverseProxy
 metadata:
   name: {{ .Values.Name }}
 spec:

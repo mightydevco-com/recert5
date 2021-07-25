@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+var VERSION = "5.0.0"
+var RELEASE = "-snapshot"
+
 // GetImagesConfigMap return the images config map which is a map of docker images
 // that the operator uses to do its various jobs
 func GetImagesConfigMap(client client.Client) (*corev1.ConfigMap, error) {
@@ -27,12 +30,20 @@ func GetImagesConfigMap(client client.Client) (*corev1.ConfigMap, error) {
 var serviceAccount = "SERVICE_ACCOUNT"
 
 // GetServiceAccount return the ServiceAccountName that the operator is using
-func GetServiceAccount() (string, error) {
-	ns, found := os.LookupEnv(serviceAccount)
+func GetServiceAccount(cli client.Client, ctx context.Context) (string, error) {
+	hostname, found := os.LookupEnv("HOSTNAME")
 	if !found {
-		return "", fmt.Errorf("%s must be set", serviceAccount)
+		return "", fmt.Errorf("HOSTNAME must be set")
 	}
-	return ns, nil
+	pods := &corev1.PodList{}
+	cli.List(ctx, pods)
+
+	for _, pod := range pods.Items {
+		if pod.GetName() == hostname {
+			return pod.Spec.ServiceAccountName, nil
+		}
+	}
+	return "", fmt.Errorf("could not find pod matching HOSTNAME")
 }
 
 // GetName return the NAME that the operator is using

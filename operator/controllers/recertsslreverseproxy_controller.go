@@ -290,6 +290,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxConfigMap(instance *rece
 }
 
 func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *recert5v1.RecertSSLReverseProxy, ctx context.Context, logger logr.Logger) (reconcile.Result, error) {
+	logger.Info("reconciling nginx deployment...")
 
 	secret, err := r.getSSLSecret(instance, ctx)
 
@@ -297,14 +298,19 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 		return reconcile.Result{}, err
 	}
 
-	imagesMap, err := GetImagesConfigMap(r.Client)
+	//	imagesMap, err := GetImagesConfigMap(r.Client)
 
-	if err != nil {
-		return reconcile.Result{}, err
-	}
+	nginxImage := "docker.io/uberscott/recert5-nginx:" + VERSION + RELEASE
+
+	/*	if err != nil {
+			logger.Error(err, "could not get image config map")
+			return reconcile.Result{}, err
+		}
+
+	*/
 
 	labels := map[string]string{
-		"sslproxy": instance.Name,
+		"ssl-reverse-proxy": instance.Name,
 	}
 
 	annotations := map[string]string{
@@ -313,7 +319,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 
 	deployment := &v1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        instance.Name + "-nginx-sslproxy",
+			Name:        instance.Name + "-nginx-ssl-reverse-proxy",
 			Namespace:   instance.Namespace,
 			Labels:      labels,
 			Annotations: annotations,
@@ -331,7 +337,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 					Containers: []corev1.Container{
 						{
 							Name:  "nginx",
-							Image: imagesMap.Data["recertNginx"],
+							Image: nginxImage,
 							VolumeMounts: []corev1.VolumeMount{
 								{Name: "conf",
 									ReadOnly:  true,
@@ -346,11 +352,11 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 					},
 					Volumes: []corev1.Volume{{
 						Name:         "conf",
-						VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: instance.Name + "-nginx-sslproxy"}}},
+						VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: instance.Name + "-nginx-ssl-reverse-proxy"}}},
 					},
 						{
 							Name:         "ssl",
-							VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: instance.Name + "-nginx-sslproxy"}},
+							VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{SecretName: instance.Name + "-nginx-ssl-reverse-proxy"}},
 						},
 					},
 				}},
@@ -383,11 +389,11 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 
 func (r *RecertSSLReverseProxyReconciler) newNginxConfigMap(cr *recert5v1.RecertSSLReverseProxy, defaultConf string) *corev1.ConfigMap {
 	labels := map[string]string{
-		"sslproxy": cr.Name,
+		"ssl-reverse-proxy": cr.Name,
 	}
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-nginx-sslproxy",
+			Name:      cr.Name + "-nginx-ssl-reverse-proxy",
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -397,11 +403,11 @@ func (r *RecertSSLReverseProxyReconciler) newNginxConfigMap(cr *recert5v1.Recert
 
 func (r *RecertSSLReverseProxyReconciler) newSSLSecret(cr *recert5v1.RecertSSLReverseProxy) *corev1.Secret {
 	labels := map[string]string{
-		"sslproxy": cr.Name,
+		"ssl-reverse-proxy": cr.Name,
 	}
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-nginx-sslproxy",
+			Name:      cr.Name + "-nginx-ssl-reverse-proxy",
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -437,11 +443,11 @@ func (r *RecertSSLReverseProxyReconciler) newCertbotService(cr *recert5v1.Recert
 
 func (r *RecertSSLReverseProxyReconciler) newService(cr *recert5v1.RecertSSLReverseProxy, log logr.Logger) *corev1.Service {
 	labels := map[string]string{
-		"sslproxy": cr.Name,
+		"ssl-reverse-proxy": cr.Name,
 	}
 	rtn := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-nginx-sslproxy",
+			Name:      cr.Name + "-nginx-ssl-reverse-proxy",
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -458,7 +464,7 @@ func (r *RecertSSLReverseProxyReconciler) newService(cr *recert5v1.RecertSSLReve
 					Protocol:   corev1.ProtocolTCP},
 			},
 			Selector: map[string]string{
-				"sslproxy": cr.Name,
+				"ssl-reverse-proxy": cr.Name,
 			},
 		},
 	}
@@ -475,11 +481,11 @@ func (r *RecertSSLReverseProxyReconciler) newService(cr *recert5v1.RecertSSLReve
 
 func (r *RecertSSLReverseProxyReconciler) newSecretPvc(cr *recert5v1.RecertSSLReverseProxy) *corev1.PersistentVolumeClaim {
 	labels := map[string]string{
-		"sslproxy": cr.Name,
+		"ssl-reverse-proxy": cr.Name,
 	}
 	return &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-nginx-sslproxy",
+			Name:      cr.Name + "-nginx-ssl-reverse-proxy",
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},

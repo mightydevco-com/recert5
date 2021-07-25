@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	recert5v1 "github.com/uberscott/recert5.git/api/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -46,6 +47,9 @@ type RecertReconciler struct {
 //+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=recert5.uberscott.com,resources=recerts/finalizers,verbs=update
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -95,6 +99,7 @@ func (r *RecertReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 func (r *RecertReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&recert5v1.Recert{}).
+		Owns(&batchv1.Job{}).
 		Complete(r)
 }
 
@@ -107,7 +112,7 @@ func (r *RecertReconciler) reconcileNone(instance *recert5v1.Recert, ctx context
 
 func (r *RecertReconciler) reconcilePending(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
-	job := r.createRecertAgentPod(instance)
+	job := r.createRecertAgentPod(instance, reqLogger)
 
 	if err := controllerutil.SetControllerReference(instance, job, r.Scheme); err != nil {
 		return reconcile.Result{}, err
@@ -241,7 +246,7 @@ func (r *RecertReconciler) reconcileFailureBackoff(instance *recert5v1.Recert, c
 
 	if elapsed < int64(backoffSeconds.Seconds()) {
 		reqLogger.Info("backoff threshold not yet reached, requeue...")
-		return reconcile.Result{Requeue: true, RequeueAfter: 24 * 60 * 60}, nil
+		return reconcile.Result{Requeue: true, RequeueAfter: time.Minute * 5}, nil
 	}
 
 	err := r.changeCertState(instance, ctx, recert5v1.Pending, reqLogger)
@@ -295,10 +300,16 @@ func (r *RecertReconciler) createAgentPodLabels(cr *recert5v1.Recert) map[string
 	}
 }
 
-func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert) *v1.Job {
+func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert, reqLogger logr.Logger) *v1.Job {
 
-	imagesMap, _ := GetImagesConfigMap(r.Client)
-	serviceAccountName, _ := GetServiceAccount()
+	certbotImage := "docker.io/uberscott/recert5-certbot:" + VERSION + RELEASE
+	serviceAccountName, err := GetServiceAccount(r.Client, context.TODO())
+
+	if err != nil {
+		reqLogger.Error(err, "cannot find ServiceAccountName")
+	}
+
+	reqLogger.Info("Creating Recert Agent Pod with Service Account: " + serviceAccountName)
 
 	labels := r.createAgentPodLabels(cr)
 
@@ -324,8 +335,8 @@ func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert) *v1.Job {
 					Containers: []corev1.Container{
 						{
 							Name:  "certbot",
-							Image: imagesMap.Data["recertCertbot"],
-							Command: []string{"/opt/recert5v1/launcher.sh",
+							Image: certbotImage,
+							Command: []string{"/opt/uberscott/launcher.sh",
 								GetCertCreateMode(r.Client),
 								cr.Spec.Domain,
 								cr.Spec.Email,
@@ -367,7 +378,9 @@ func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert) *v1.Job {
 /////////////////////////////////////
 
 func (r *RecertReconciler) changeCertState(instance *recert5v1.Recert, ctx context.Context, state string, reqLogger logr.Logger) error {
+
 	prevState := instance.Status.State
+	reqLogger.Info("change cert status from: "+prevState+" to "+state)
 
 	// first lets get the latest instance
 	err := r.Client.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, instance)

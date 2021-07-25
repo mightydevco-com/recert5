@@ -9,10 +9,10 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s 
     mv kubectl /usr/bin && \
     chmod 755 /usr/bin/kubectl
 
-RUN mkdir -p /opt/mightydevco
+RUN mkdir -p /opt/uberscott
 
-WORKDIR /opt/mightydevco
+WORKDIR /opt/uberscott
 
-ENTRYPOINT /opt/mightydevco/launcher.sh
+ENTRYPOINT /opt/uberscott/launcher.sh
 
-COPY *.sh /opt/mightydevco/
+COPY *.sh /opt/uberscott/

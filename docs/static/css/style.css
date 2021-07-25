@@ -2,16 +2,27 @@
 body {background-color: #330000;}
 
 
+.zoom{
+overflow: hidden;
+padding-bottom: 55%;
+}
+
+.zoom img{
+position: fixed;
+top: 0%;
+left: 50%;
+transform: translateX(-50%);
+}
+
 .center{
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 50%;
 }
 
 
-img.big_logo {
-  max-width: 45%;
+.big_logo {
+  max-width: 25%;
   height: auto;
 }
 

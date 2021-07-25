@@ -1,5 +1,5 @@
-Name: example
-Domain: example.mightydevco.com
-LoadBalancerIP: 35.226.143.180
+Name: example-nginx
+Domain: example.uberscott.com
+#LoadBalancerIP: 34.68.16.1
 Email: scott@mightydevco.com
 

@@ -22,24 +22,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200&display=swap" rel="stylesheet">
 
+<script src="jquery-3.5.1.min.js"></script>
+
 </head>
 <body>
-<img src="{{"big-logo.png" | relURL }}" class="big_logo center"/>
+<img src="{{"recert-logo.svg" | relURL }}" class="big_logo center"/>
 <span class="tagline">"A Kubernetes Operator that Automatically Renews SSL Certificates."</span>
 
-<p></p>
-<p></p>
-
+<p/>
 
 <div id=video>
 <iframe width="100%" height="100%" src="https://www.youtube.com/embed/tXOZicFq5JY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
 
-<p></p>
-<p></p>
-
-
 <footer id="main-footer">
 <a href="{{"/contact"| relURL }}">Contact</a>
 </footer>
+
+<script>
+$(window).scroll(function(){
+  var val = 1.5;
+  $(".big_logo").css({
+  'opacity' : 1 - $(window).scrollTop() / 250,
+  'transform': 'scale(1.5)' - $(window).scrollTop() / 250
+  });
+});
+</script>
