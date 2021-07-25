@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"strconv"
 	"time"
 )
 
@@ -89,7 +90,7 @@ func (r *RecertReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	} else if instance.Status.State == recert5v1.FailureBackoff {
 		return r.reconcileFailureBackoff(instance, ctx, reqLogger)
 	} else if instance.Status.State == recert5v1.Updated {
-		return r.reconcileFailureBackoff(instance, ctx, reqLogger)
+		return r.reconcileUpdated(instance, ctx, reqLogger)
 	}
 
 	return ctrl.Result{}, nil
@@ -153,6 +154,7 @@ func (r *RecertReconciler) reconcilePending(instance *recert5v1.Recert, ctx cont
 
 func (r *RecertReconciler) reconcileCreating(instance *recert5v1.Recert, ctx context.Context, reqLogger logr.Logger) (reconcile.Result, error) {
 
+	reqLogger.Info("reconcileCreating.")
 	job, err := r.findJob(instance, ctx)
 
 	// if we can't find the job, then something went really wrong FailureBackoff
@@ -165,7 +167,7 @@ func (r *RecertReconciler) reconcileCreating(instance *recert5v1.Recert, ctx con
 	if job.Status.Failed > 0 {
 		r.changeCertState(instance, ctx, recert5v1.FailureBackoff, reqLogger)
 		reqLogger.Info("Job failed.")
-		r.Client.Delete(ctx, job)
+		r.Delete(ctx, job)
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
 	}
 
@@ -175,12 +177,12 @@ func (r *RecertReconciler) reconcileCreating(instance *recert5v1.Recert, ctx con
 	}
 
 	// delete the old job
-	r.Client.Delete(ctx, job)
+	r.Delete(ctx, job)
 
 	// delete leftover pods
 	var pod corev1.Pod
 	pod.Namespace = instance.Namespace
-	err = r.Client.DeleteAllOf(ctx, &pod, &client.DeleteAllOfOptions{
+	err = r.DeleteAllOf(ctx, &pod, &client.DeleteAllOfOptions{
 		ListOptions: client.ListOptions{Namespace: instance.Namespace, LabelSelector: labels.SelectorFromSet(r.createAgentPodLabels(instance))},
 	})
 
@@ -198,16 +200,19 @@ func (r *RecertReconciler) reconcileCreating(instance *recert5v1.Recert, ctx con
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Second * GetCertFailureBackoffSeconds(r.Client)}, err
 	}
 
+	reqLogger.Info("new secret name is: '" + newSecret.Name + "'  GENERATED name is '" + newSecretName(instance))
+	reqLogger.Info("new secret data SIZE : " + strconv.Itoa(len(newSecret.Data)))
+
 	secret.Data = newSecret.Data
 
-	err = r.Client.Delete(ctx, newSecret)
+	err = r.Delete(ctx, newSecret)
 
 	if err != nil {
 		reqLogger.Error(err, "cannot delete new secret")
 	}
 
-	r.Client.Delete(ctx, newSecret)
 	err = r.Client.Update(ctx, secret)
+	reqLogger.Info("secret data TRANSFERRED")
 
 	if err != nil {
 		reqLogger.Error(err, "cannot update secret")
@@ -340,7 +345,7 @@ func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert, reqLogger 
 								GetCertCreateMode(r.Client),
 								cr.Spec.Domain,
 								cr.Spec.Email,
-								cr.Name + "-nginx-sslproxy"},
+								cr.Name + "-nginx-ssl-reverse-proxy"},
 
 							VolumeMounts: []corev1.VolumeMount{
 								{
@@ -380,10 +385,10 @@ func (r *RecertReconciler) createRecertAgentPod(cr *recert5v1.Recert, reqLogger 
 func (r *RecertReconciler) changeCertState(instance *recert5v1.Recert, ctx context.Context, state string, reqLogger logr.Logger) error {
 
 	prevState := instance.Status.State
-	reqLogger.Info("change cert status from: "+prevState+" to "+state)
+	reqLogger.Info("change cert status from: " + prevState + " to " + state)
 
 	// first lets get the latest instance
-	err := r.Client.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, instance)
+	err := r.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, instance)
 
 	instance.Status.State = state
 
@@ -393,7 +398,7 @@ func (r *RecertReconciler) changeCertState(instance *recert5v1.Recert, ctx conte
 
 	instance.Status.LastStateChange = time.Now().Unix()
 
-	err = r.Client.Status().Update(ctx, instance)
+	err = r.Status().Update(ctx, instance)
 
 	if err != nil {
 		reqLogger.Error(err, "error when attempting to change Cert status")

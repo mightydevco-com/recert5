@@ -345,7 +345,7 @@ func (r *RecertSSLReverseProxyReconciler) reconcileNginxDeployment(instance *rec
 								},
 								{Name: "ssl",
 									ReadOnly:  true,
-									MountPath: "/etc/recert/ssl",
+									MountPath: "/ssl",
 								},
 							},
 						},
