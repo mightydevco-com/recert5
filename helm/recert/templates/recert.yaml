@@ -1,0 +1,8 @@
+apiVersion: recert5.uberscott.com/v1
+kind: Recert
+metadata:
+  name: example
+spec:
+  domain: {{ .Values.Domain }}
+  email: {{ .Values.Email}}
+  sslReverseProxy: example

@@ -1,10 +1,10 @@
 apiVersion: recert5.uberscott.com/v1
 kind: RecertSSLReverseProxy
 metadata:
-  name: {{ .Values.Name }}
+  name: example
 spec:
   {{ if .Values.LoadBalancerIP }} 
   loadBalancerIP: {{ .Values.LoadBalancerIP }} 
   {{ end }}
-  pass: "http://{{ .Values.Pass }}:80"
+  pass: "http://example-nginx:80"
   replicas: 1

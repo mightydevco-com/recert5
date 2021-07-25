@@ -1,6 +1,7 @@
 
 VERSION = 5.0.1
 documentation:
+	zip -r docs/static/files/helm-charts.zip helm
 	cd docs && hugo -D -b recert5
 	rm -rf ../websites/uberscott.com/html/recert5
 	mkdir ../websites/uberscott.com/html/recert5
